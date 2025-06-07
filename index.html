@@ -286,6 +286,23 @@
         width: 100vw;
         padding: 0 0.5rem;
       }
+       .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background-color: red;
+      top: -10px;
+      animation: fall linear infinite;
+    }
+    @keyframes fall {
+      0% {
+        transform: translateY(-10px) rotate(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
     }
   </style>
 </head>
@@ -555,6 +572,23 @@
           k.classList.remove('correct', 'present', 'absent');
         });
       }
+
+      function playMusic() {
+      const player = document.getElementById("ytplayer");
+      player.src = "https://www.youtube.com/embed/doJowMbDYyI?autoplay=1";
+    }
+      
+      function startConfetti() {
+      setInterval(() => {
+        const confetti = document.createElement("div");
+        confetti.classList.add("confetti");
+        confetti.style.left = Math.random() * window.innerWidth + "px";
+        confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 70%, 60%)`;
+        confetti.style.animationDuration = (2 + Math.random() * 3) + 's';
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 5000);
+      }, 100);
+    }
 
       playAgainBtn.addEventListener('click', resetGame);
       keyboard.addEventListener('click', handleKeyboardClick);
