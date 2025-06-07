@@ -42,7 +42,6 @@
       padding: 1rem;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      overflow-x: hidden;
     }
 
     header {
@@ -70,7 +69,6 @@
       flex-direction: column;
       align-items: center;
       gap: 1.5rem;
-      padding: 0 1rem;
     }
 
     #game-grid {
@@ -201,24 +199,16 @@
       transform: translate(-50%, -50%);
       background: var(--color-bg);
       box-shadow: 0 10px 30px rgba(0,0,0,0.12);
-      border-radius: 0.75rem;
-      padding: 2rem 2.5rem;
-      text-align: left;
+      border-radius: 1rem;
+      padding: 2rem 3rem;
+      text-align: center;
       max-width: 90vw;
-      width: 600px;
+      width: 400px;
       display: none;
       flex-direction: column;
       gap: 1rem;
       user-select: none;
       z-index: 20;
-      font-size: 1.15rem;
-      line-height: 1.5;
-      color: #4b5563; /* a softer gray for the text */
-      font-weight: 500;
-      box-sizing: border-box;
-      overflow-wrap: break-word;
-      white-space: pre-wrap;
-      /* typing container horizontally wider and left-aligned */
     }
 
     #message-container.show {
@@ -227,11 +217,9 @@
     }
 
     #message-text {
-      font-weight: 600;
+      font-size: 1.5rem;
+      font-weight: 700;
       color: var(--color-text);
-      /* The typing text is big, comfortable to read, left aligned */
-      font-size: 1.3rem;
-      line-height: 1.6;
     }
 
     #play-again-btn {
@@ -244,8 +232,6 @@
       font-size: 1rem;
       cursor: pointer;
       transition: background-color 0.3s ease;
-      align-self: flex-start;
-      box-shadow: 0 2px 8px rgba(52, 211, 153, 0.6);
     }
 
     #play-again-btn:hover {
@@ -261,19 +247,6 @@
         opacity: 1;
         transform: translate(-50%, -50%) scale(1);
       }
-    }
-
-    /* Confetti styles */
-    .confetti {
-      position: fixed;
-      width: 10px;
-      height: 10px;
-      background-color: var(--color-key-correct);
-      opacity: 0.9;
-      z-index: 30;
-      pointer-events: none;
-      border-radius: 2px;
-      will-change: transform, opacity;
     }
 
     @media (max-width: 640px){
@@ -294,12 +267,6 @@
       #keyboard {
         width: 100vw;
         padding: 0 0.5rem;
-      }
-
-      #message-container {
-        width: 90vw;
-        font-size: 1rem;
-        padding: 1rem 1.5rem;
       }
     }
   </style>
@@ -353,7 +320,7 @@
     <button id="play-again-btn" type="button">Main lagi</button>
   </div>
 
-  <audio id="victory-audio" src="https://cdn.pixabay.com/download/audio/2023/03/05/audio_94a5b4e7db.mp3?filename=birthday-celebration-10770.mp3" preload="auto"></audio>
+  <audio id="victory-audio" src="https://www.youtube.com/watch?v=doJowMbDYyI" preload="auto"></audio>
 
   <script>
     (() => {
@@ -392,7 +359,7 @@
 
       // Update keyboard key classes based on letter state
       function updateKey(letter, state) {
-        const key = keyboard.querySelector(\`button[data-key="\${letter}"]\`);
+        const key = keyboard.querySelector(`button[data-key="${letter}"]`);
         if (!key) return;
         if (key.classList.contains('correct')) return; // do not override green
         if (key.classList.contains('present') && state === 'absent') return; // do not override yellow by gray
@@ -401,7 +368,7 @@
         key.classList.add(state);
       }
 
-      // Show message overlay with typing effect and confetti
+      // Show message overlay with typing effect
       function showMessage(text) {
         messageText.textContent = '';
         messageContainer.classList.add('show');
@@ -418,13 +385,7 @@
           } else {
             clearInterval(typingInterval);
           }
-        }, 50); // Typing speed
-
-      }
-
-      // Hide message overlay
-      function hideMessage() {
-        messageContainer.classList.remove('show');
+        }, 50); // Adjust typing speed here
       }
 
       // Check guess and reveal colors
@@ -461,7 +422,7 @@
           tile.classList.add('revealed');
           tile.classList.add(guessResult[index]);
           tile.textContent = guessUpper[index];
-          tile.setAttribute('aria-label', \`\${guessUpper[index]}: \${guessResult[index] === 'correct' ? 'Benar dan posisi tepat' : guessResult[index] === 'present' ? 'Benar tapi posisi salah' : 'Tidak ada di kata'}\`);
+          tile.setAttribute('aria-label', `${guessUpper[index]}: ${guessResult[index] === 'correct' ? 'Benar dan posisi tepat' : guessResult[index] === 'present' ? 'Benar tapi posisi salah' : 'Tidak ada di kata'}`);
           updateKey(guessUpper[index], guessResult[index]);
         });
 
@@ -490,7 +451,35 @@
         for (let i = 0; i < WORD_LENGTH; i++) {
           tiles[i].textContent = currentGuess[i] ? currentGuess[i].toUpperCase() : '';
           tiles[i].classList.remove('revealed', 'correct', 'present', 'absent');
-          tiles[i].setAttribute('aria-label', tiles[i].textContent ? \`\${tiles[i].textContent}: Belum dicek\` : 'Kosong');
+          tiles[i].setAttribute('aria-label', tiles[i].textContent ? `${tiles[i].textContent}: Belum dicek` : 'Kosong');
+        }
+      }
+
+      // Submit current guess
+      function submitGuess() {
+        if (isGameOver) return;
+        if (currentGuess.length !== WORD_LENGTH) {
+          showTemporaryMessage(`Masukkan ${WORD_LENGTH} huruf terlebih dahulu.`);
+          return;
+        }
+
+        // Validate guess: For this demo, only allow guesses of 5 letters; no dictionary used.
+        // Reveal guess colors
+        const isCorrect = revealGuess(currentGuess);
+
+        if (isCorrect) {
+          isGameOver = true;
+          victoryAudio.play(); // Play the audio
+          showMessage("Hari ini adalah hari di mana malaikat dalam hidupku dilahirkan. Tak terhitung berapa banyak air mata yang Ibu usap, berapa banyak tawa yang Ibu ciptakan, dan berapa banyak pelajaran hidup yang Ibu ajarkan. Setiap pelukan Ibu adalah rumah terbaik, dan setiap senyum Ibu adalah cahaya yang tak pernah padam. Terima kasih, Bu, sudah menjadi Ibu yang paling hebat di dunia ini. Semoga sisa umur Ibu dipenuhi dengan kebahagiaan, kedamaian, dan keberkahan. Doakan saya bisa selalu membanggakan Ibu.");
+        } else {
+          currentRow++;
+          currentGuess = '';
+          if (currentRow === MAX_GUESSES) {
+            isGameOver = true;
+            showMessage(`Game selesai! Kata yang benar: ${WORD}`);
+            return;
+          }
+          updateCurrentRow();
         }
       }
 
@@ -533,83 +522,6 @@
         }
       }
 
-      // Confetti effect helper
-      function createConfettiPiece() {
-        const confetti = document.createElement('div');
-        confetti.classList.add('confetti');
-        confetti.style.backgroundColor = randomColor();
-        confetti.style.left = Math.random() * window.innerWidth + 'px';
-        confetti.style.top = '-10px';
-        confetti.style.width = confetti.style.height = (Math.random() * 8 + 4) + 'px';
-        confetti.style.opacity = 1;
-        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
-        document.body.appendChild(confetti);
-
-        const gravity = 0.3 + Math.random() * 0.3;
-        let velocityX = (Math.random() - 0.5) * 10;
-        let velocityY = Math.random() * 7 + 3;
-        let rotation = Math.random() * 10;
-        let rotationSpeed = (Math.random() - 0.5) * 20;
-
-        function update() {
-          velocityY += gravity;
-          let x = parseFloat(confetti.style.left);
-          let y = parseFloat(confetti.style.top);
-          x += velocityX;
-          y += velocityY;
-          rotation += rotationSpeed;
-          confetti.style.left = x + 'px';
-          confetti.style.top = y + 'px';
-          confetti.style.transform = `rotate(${rotation}deg)`;
-          confetti.style.opacity -= 0.005;
-          if (y > window.innerHeight || confetti.style.opacity <= 0) {
-            confetti.remove();
-            return;
-          }
-          requestAnimationFrame(update);
-        }
-        requestAnimationFrame(update);
-      }
-
-      function randomColor() {
-        const colors = ['#22c55e', '#10b981', '#34d399', '#059669', '#047857'];
-        return colors[Math.floor(Math.random() * colors.length)];
-      }
-
-      function launchConfetti(amount = 100) {
-        for(let i=0; i<amount; i++) {
-          setTimeout(createConfettiPiece, i * 15);
-        }
-      }
-
-      // Submit current guess
-      function submitGuess() {
-        if (isGameOver) return;
-        if (currentGuess.length !== WORD_LENGTH) {
-          showTemporaryMessage(\`Masukkan \${WORD_LENGTH} huruf terlebih dahulu.\`);
-          return;
-        }
-
-        // Reveal guess colors
-        const isCorrect = revealGuess(currentGuess);
-
-        if (isCorrect) {
-          isGameOver = true;
-          victoryAudio.play(); // Play the audio
-          showMessage("Hari ini adalah hari di mana malaikat dalam hidupku dilahirkan. Tak terhitung berapa banyak air mata yang Ibu usap, berapa banyak tawa yang Ibu ciptakan, dan berapa banyak pelajaran hidup yang Ibu ajarkan. Setiap pelukan Ibu adalah rumah terbaik, dan setiap senyum Ibu adalah cahaya yang tak pernah padam. Terima kasih, Bu, sudah menjadi Ibu yang paling hebat di dunia ini. Semoga sisa umur Ibu dipenuhi dengan kebahagiaan, kedamaian, dan keberkahan. Doakan saya bisa selalu membanggakan Ibu.");
-          launchConfetti();
-        } else {
-          currentRow++;
-          currentGuess = '';
-          if (currentRow === MAX_GUESSES) {
-            isGameOver = true;
-            showMessage(\`Game selesai! Kata yang benar: \${WORD}\`);
-          } else {
-            updateCurrentRow();
-          }
-        }
-      }
-
       // Reset the game state
       function resetGame() {
         currentGuess = '';
@@ -621,17 +533,16 @@
         keyboard.querySelectorAll('.key').forEach(k => {
           k.classList.remove('correct', 'present', 'absent');
         });
-        victoryAudio.pause();
-        victoryAudio.currentTime = 0;
       }
 
       playAgainBtn.addEventListener('click', resetGame);
       keyboard.addEventListener('click', handleKeyboardClick);
       window.addEventListener('keyup', handleKeyup);
 
+      // Initialize
       createGrid();
+
     })();
   </script>
 </body>
 </html>
-
