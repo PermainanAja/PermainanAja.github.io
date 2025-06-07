@@ -508,6 +508,11 @@
           isGameOver = true;
           startConfetti();
           showMessage("Untuk Ibu tercinta, selamat ulang tahun. Semoga kebahagiaan senantiasa menyertai langkah Ibu, dan setiap doamu menjadi nyata. Terima kasih sudah menjadi pelita dalam hidupku. Selamat menikmati hari istimewamu, Bu!");
+          if(audioCtx && audioCtx.state === 'suspended'){
+          // Resume AudioContext if suspended due to autoplay policy
+          await audioCtx.resume();
+        }
+        playMelodyLoop();
           return;
         } else {
           currentRow++;
@@ -573,9 +578,67 @@
         });
       }
 
-      function playMusic() {
-      const player = document.getElementById("ytplayer");
-      player.src = "https://www.youtube.com/embed/doJowMbDYyI?autoplay=1";
+       // Happy Birthday melody using Web Audio API
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = AudioContext ? new AudioContext() : null;
+    const notesFreq = {
+      'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00, 'A4': 440.00, 'B4': 493.88,
+      'C5': 523.25
+    };
+    // Happy Birthday melody notes and durations (quarter note as 1 unit)
+    // Format: [note, durationMultiplier]
+    const melody = [
+      ['C4',1], ['C4',0.5], ['D4',0.5], ['C4',1], ['F4',1], ['E4',2],
+      ['C4',1], ['C4',0.5], ['D4',0.5], ['C4',1], ['G4',1], ['F4',2],
+      ['C4',1], ['C4',0.5], ['C5',0.5], ['A4',1], ['F4',1], ['E4',1], ['D4',2],
+      ['A#4',1], ['A#4',0.5], ['A4',0.5], ['F4',1], ['G4',1], ['F4',2]
+    ];
+    // Some notes for "Happy Birthday" standard - replace A#4 with A#4 freq
+    notesFreq['A#4'] = 466.16;
+
+      // Play single tone function
+    function playTone(freq, duration) {
+      return new Promise(resolve => {
+        if(!audioCtx) {
+          resolve();
+          return;
+        }
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.frequency.value = freq;
+        oscillator.type = 'sine';
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.start();
+        gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        setTimeout(() => {
+          gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.04);
+          oscillator.stop(audioCtx.currentTime + 0.05);
+          oscillator.onended = resolve;
+        }, duration);
+      });
+    }
+
+      // Play melody continuously
+    let playingMelody = false;
+    async function playMelodyLoop() {
+      if (playingMelody) return;
+      playingMelody = true;
+      while (playingMelody) {
+        for (const [note, durationMul] of melody) {
+          if(!playingMelody) break;
+          const freq = notesFreq[note] || 440;
+          const duration = 400 * durationMul; // base 400ms
+          await playTone(freq, duration);
+          // brief pause between notes
+          await new Promise(r => setTimeout(r, 40));
+        }
+        // Pause before looping again
+        await new Promise(r => setTimeout(r, 800));
+      }
+    }
+    function stopMelody() {
+      playingMelody = false;
     }
       
       playAgainBtn.addEventListener('click', resetGame);
