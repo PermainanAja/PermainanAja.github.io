@@ -506,14 +506,13 @@
 
         if (isCorrect) {
           isGameOver = true;
-          showMessage('Selamat! Kamu berhasil menebak kata!');
+          showMessage("Hari ini adalah hari di mana malaikat dalam hidupku dilahirkan. Tak terhitung berapa banyak air mata yang Ibu usap, berapa banyak tawa yang Ibu ciptakan, dan berapa banyak pelajaran hidup yang Ibu ajarkan. Setiap pelukan Ibu adalah rumah terbaik, dan setiap senyum Ibu adalah cahaya yang tak pernah padam. Terima kasih, Bu, sudah menjadi Ibu yang paling hebat di dunia ini. Semoga sisa umur Ibu dipenuhi dengan kebahagiaan, kedamaian, dan keberkahan. Doakan saya bisa selalu membanggakan Ibu.");
           return;
         } else {
           currentRow++;
           currentGuess = '';
           if (currentRow === MAX_GUESSES) {
             isGameOver = true;
-          showMessage("Hari ini adalah hari di mana malaikat dalam hidupku dilahirkan. Tak terhitung berapa banyak air mata yang Ibu usap, berapa banyak tawa yang Ibu ciptakan, dan berapa banyak pelajaran hidup yang Ibu ajarkan. Setiap pelukan Ibu adalah rumah terbaik, dan setiap senyum Ibu adalah cahaya yang tak pernah padam. Terima kasih, Bu, sudah menjadi Ibu yang paling hebat di dunia ini. Semoga sisa umur Ibu dipenuhi dengan kebahagiaan, kedamaian, dan keberkahan. Doakan saya bisa selalu membanggakan Ibu.");
             showMessage(`Game selesai! Kata yang benar: ${WORD}`);
             return;
           }
@@ -578,7 +577,16 @@
       player.src = "https://www.youtube.com/embed/doJowMbDYyI?autoplay=1";
     }
       
-      function startConfetti() {
+      playAgainBtn.addEventListener('click', resetGame);
+      keyboard.addEventListener('click', handleKeyboardClick);
+      window.addEventListener('keyup', handleKeyup);
+
+      // Initialize
+      createGrid();
+
+    })();
+
+    function startConfetti() {
       setInterval(() => {
         const confetti = document.createElement("div");
         confetti.classList.add("confetti");
@@ -589,15 +597,6 @@
         setTimeout(() => confetti.remove(), 5000);
       }, 100);
     }
-
-      playAgainBtn.addEventListener('click', resetGame);
-      keyboard.addEventListener('click', handleKeyboardClick);
-      window.addEventListener('keyup', handleKeyup);
-
-      // Initialize
-      createGrid();
-
-    })();
   </script>
 </body>
 </html>
