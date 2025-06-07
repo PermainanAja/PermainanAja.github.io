@@ -222,6 +222,24 @@
       color: var(--color-text);
     }
 
+        .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background-color: red;
+      top: -10px;
+      animation: fall linear infinite;
+    }
+    @keyframes fall {
+      0% {
+        transform: translateY(-10px) rotate(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
     #play-again-btn {
       background-color: var(--color-key-correct);
       border: none;
@@ -320,8 +338,6 @@
     <button id="play-again-btn" type="button">Main lagi</button>
   </div>
 
-  <audio id="victory-audio" src="https://www.youtube.com/watch?v=doJowMbDYyI" preload="auto"></audio>
-
   <script>
     (() => {
       const WORD = 'CINTA';
@@ -333,7 +349,6 @@
       const messageContainer = document.getElementById('message-container');
       const messageText = document.getElementById('message-text');
       const playAgainBtn = document.getElementById('play-again-btn');
-      const victoryAudio = document.getElementById('victory-audio');
 
       let currentGuess = '';
       let currentRow = 0;
@@ -374,7 +389,7 @@
         messageContainer.classList.add('show');
         typeMessage(text);
       }
-
+      
       // Typing effect for message
       function typeMessage(text) {
         let index = 0;
@@ -386,6 +401,11 @@
             clearInterval(typingInterval);
           }
         }, 50); // Adjust typing speed here
+      }
+
+      // Hide message overlay
+      function hideMessage() {
+        messageContainer.classList.remove('show');
       }
 
       // Check guess and reveal colors
@@ -469,14 +489,14 @@
 
         if (isCorrect) {
           isGameOver = true;
-          victoryAudio.play(); // Play the audio
-          typeMessage("Hari ini adalah hari di mana malaikat dalam hidupku dilahirkan. Tak terhitung berapa banyak air mata yang Ibu usap, berapa banyak tawa yang Ibu ciptakan, dan berapa banyak pelajaran hidup yang Ibu ajarkan. Setiap pelukan Ibu adalah rumah terbaik, dan setiap senyum Ibu adalah cahaya yang tak pernah padam. Terima kasih, Bu, sudah menjadi Ibu yang paling hebat di dunia ini. Semoga sisa umur Ibu dipenuhi dengan kebahagiaan, kedamaian, dan keberkahan. Doakan saya bisa selalu membanggakan Ibu.");
-        startConfetti();
-      } else {
+          showMessage('Selamat! Kamu berhasil menebak kata!');
+          return;
+        } else {
           currentRow++;
           currentGuess = '';
           if (currentRow === MAX_GUESSES) {
             isGameOver = true;
+          showMessage("Hari ini adalah hari di mana malaikat dalam hidupku dilahirkan. Tak terhitung berapa banyak air mata yang Ibu usap, berapa banyak tawa yang Ibu ciptakan, dan berapa banyak pelajaran hidup yang Ibu ajarkan. Setiap pelukan Ibu adalah rumah terbaik, dan setiap senyum Ibu adalah cahaya yang tak pernah padam. Terima kasih, Bu, sudah menjadi Ibu yang paling hebat di dunia ini. Semoga sisa umur Ibu dipenuhi dengan kebahagiaan, kedamaian, dan keberkahan. Doakan saya bisa selalu membanggakan Ibu.");
             showMessage(`Game selesai! Kata yang benar: ${WORD}`);
             return;
           }
@@ -542,47 +562,10 @@
 
       // Initialize
       createGrid();
-      
-    function playMusic() {
-      const yt = document.createElement("iframe");
-      yt.width = 0;
-      yt.height = 0;
-      yt.src = "https://www.youtube.com/embed/doJowMbDYyI?autoplay=1&mute=0";
-      yt.allow = "autoplay";
-      yt.style.display = "none";
-      document.body.appendChild(yt);
-    }
-      
-        // Confetti effect
-    const confettiCanvas = document.getElementById('confetti');
-    const ctx = confettiCanvas.getContext('2d');
-    confettiCanvas.width = window.innerWidth;
-    confettiCanvas.height = window.innerHeight;
-    const pieces = [];
-    for (let i = 0; i < 150; i++) {
-      pieces.push({
-        x: Math.random() * confettiCanvas.width,
-        y: Math.random() * confettiCanvas.height - confettiCanvas.height,
-        radius: Math.random() * 6 + 4,
-        color: `hsl(${Math.random() * 360}, 100%, 50%)`,
-        speed: Math.random() * 3 + 2
-      });
-    }
-    function drawConfetti() {
-      ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-      for (const p of pieces) {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI);
-        ctx.fillStyle = p.color;
-        ctx.fill();
-        p.y += p.speed;
-        if (p.y > confettiCanvas.height) p.y = 0;
-      }
-      requestAnimationFrame(drawConfetti);
-    }
-    function startConfetti() {
-      drawConfetti();
-    }
+
+    })();
   </script>
 </body>
 </html>
+
+
