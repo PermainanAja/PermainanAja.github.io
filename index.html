@@ -579,7 +579,7 @@ async function playHappyBirthdaySong() {
           currentGuess = '';
           if (currentRow === MAX_GUESSES) {
             isGameOver = true;
-            showMessage(`Game selesai! Kata yang benar: ${WORD}`);
+            showMessage(`Game selesai! Silahkan coba lagi!`);
             return;
           }
           updateCurrentRow();
