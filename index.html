@@ -221,8 +221,8 @@
       font-weight: 700;
       color: var(--color-text);
     }
-    
-        .confetti {
+
+      .confetti {
       position: fixed;
       width: 10px;
       height: 10px;
@@ -238,8 +238,9 @@
       100% {
         transform: translateY(100vh) rotate(360deg);
         opacity: 0;
-      }
+     }
     }
+
     #play-again-btn {
       background-color: var(--color-key-correct);
       border: none;
@@ -286,7 +287,7 @@
         width: 100vw;
         padding: 0 0.5rem;
       }
-       .confetti {
+      .confetti {
       position: fixed;
       width: 10px;
       height: 10px;
@@ -303,6 +304,7 @@
         transform: translateY(100vh) rotate(360deg);
         opacity: 0;
       }
+    }
     }
   </style>
 </head>
@@ -354,7 +356,6 @@
     <div id="message-text"></div>
     <button id="play-again-btn" type="button">Main lagi</button>
   </div>
-
   <script>
     (() => {
       const WORD = 'CINTA';
@@ -406,7 +407,7 @@
         messageContainer.classList.add('show');
         typeMessage(text);
       }
-      
+
       // Typing effect for message
       function typeMessage(text) {
         let index = 0;
@@ -418,11 +419,6 @@
             clearInterval(typingInterval);
           }
         }, 50); // Adjust typing speed here
-      }
-
-      // Hide message overlay
-      function hideMessage() {
-        messageContainer.classList.remove('show');
       }
 
       // Check guess and reveal colors
@@ -467,6 +463,75 @@
         return guessResult.every(state => state === 'correct');
       }
 
+      // Web Audio API play Happy Birthday melody
+async function playHappyBirthdaySong() {
+  if (!window.AudioContext && !window.webkitAudioContext) {
+    console.warn("Web Audio API not supported");
+    return;
+  }
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  const ctx = new AudioContext();
+
+  // Notes (frequency in Hz) and durations (ms)
+  const notes = [
+    { freq: 392, dur: 400 }, // G4
+    { freq: 392, dur: 400 }, // G4
+    { freq: 440, dur: 800 }, // A4
+    { freq: 392, dur: 800 }, // G4
+    { freq: 523, dur: 1600 }, // C5
+    { freq: 494, dur: 3200 }, // B4
+
+    { freq: 392, dur: 400 }, // G4
+    { freq: 392, dur: 400 }, // G4
+    { freq: 440, dur: 800 }, // A4
+    { freq: 392, dur: 800 }, // G4
+    { freq: 587, dur: 1600 }, // D5
+    { freq: 523, dur: 3200 }, // C5
+
+    { freq: 392, dur: 400 }, // G4
+    { freq: 392, dur: 400 }, // G4
+    { freq: 784, dur: 800 }, // G5
+    { freq: 659, dur: 800 }, // E5
+    { freq: 523, dur: 1600 }, // C5
+    { freq: 494, dur: 800 }, // B4
+    { freq: 440, dur: 3200 }, // A4
+
+    { freq: 698, dur: 400 }, // F5
+    { freq: 698, dur: 400 }, // F5
+    { freq: 659, dur: 800 }, // E5
+    { freq: 523, dur: 800 }, // C5
+    { freq: 587, dur: 1600 }, // D5
+    { freq: 523, dur: 3200 }  // C5
+  ];
+
+  let currentTime = ctx.currentTime;
+
+  // Helper function to play a tone
+  function playTone(freq, duration, startTime) {
+    return new Promise(resolve => {
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      oscillator.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      oscillator.type = 'sine';
+      oscillator.frequency.value = freq;
+      gainNode.gain.setValueAtTime(0.15, startTime);
+      oscillator.start(startTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration / 1000);
+      oscillator.stop(startTime + duration / 1000 + 0.02);
+      oscillator.onended = resolve;
+    });
+  }
+
+  // Play all notes sequentially
+  for (const note of notes) {
+    await playTone(note.freq, note.dur, currentTime);
+    currentTime += note.dur / 1000;
+  }
+
+  ctx.close();
+}
+
       // Insert letter in current guess
       function insertLetter(letter) {
         if (isGameOver) return;
@@ -507,8 +572,8 @@
         if (isCorrect) {
           isGameOver = true;
           startConfetti();
+          playHappyBirthdaySong(); // play API-generated song
           showMessage("Untuk Ibu tercinta, selamat ulang tahun. Semoga kebahagiaan senantiasa menyertai langkah Ibu, dan setiap doamu menjadi nyata. Terima kasih sudah menjadi pelita dalam hidupku. Selamat menikmati hari istimewamu, Bu!");
-          return;
         } else {
           currentRow++;
           currentGuess = '';
@@ -573,12 +638,6 @@
         });
       }
 
-       
-          oscillator.onended = resolve;
-        }, duration);
-      });
-    }
-      
       playAgainBtn.addEventListener('click', resetGame);
       keyboard.addEventListener('click', handleKeyboardClick);
       window.addEventListener('keyup', handleKeyup);
@@ -602,5 +661,3 @@
   </script>
 </body>
 </html>
-
-
